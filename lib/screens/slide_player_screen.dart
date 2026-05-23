@@ -1299,41 +1299,55 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: YoutubePlayer(
-                  controller: _ytController!,
+            if (!kIsWeb && Platform.isWindows)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Text(
+                    "Video playback is not supported on Windows Desktop yet.\nUse the web version or open externally.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.amber, fontSize: 13),
+                  ),
+                ),
+              )
+            else
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: YoutubePlayer(
+                    controller: _ytController!,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () => _ytController?.enterFullScreen(),
-                  icon: const Icon(Icons.fullscreen),
-                  label: const Text("Full Screen"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                if (!(!kIsWeb && Platform.isWindows))
+                  ElevatedButton.icon(
+                    onPressed: () => _ytController?.enterFullScreen(),
+                    icon: const Icon(Icons.fullscreen),
+                    label: const Text("Full Screen"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: () => _ytController?.exitFullScreen(),
-                  icon: const Icon(Icons.fullscreen_exit),
-                  label: const Text("Exit Full Screen"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                if (!(!kIsWeb && Platform.isWindows)) const SizedBox(width: 8),
+                if (!(!kIsWeb && Platform.isWindows))
+                  ElevatedButton.icon(
+                    onPressed: () => _ytController?.exitFullScreen(),
+                    icon: const Icon(Icons.fullscreen_exit),
+                    label: const Text("Exit Full Screen"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                if (!(!kIsWeb && Platform.isWindows)) const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
                     final videoId = YoutubePlayerController.convertUrlToId(widget.topic.youtubeId) ?? widget.topic.youtubeId;

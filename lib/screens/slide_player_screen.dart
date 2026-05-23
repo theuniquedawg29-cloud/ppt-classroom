@@ -405,9 +405,9 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: Colors.white.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
                   ),
                   child: Center(
                     child: Text(
@@ -459,7 +459,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withOpacity(0.3),
                     border: const Border(top: BorderSide(color: Colors.white10)),
                   ),
                   child: Row(
@@ -469,9 +469,9 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                       ElevatedButton(
                         onPressed: _currentSlideIndex > 0 ? () => _navigateToSlide(_currentSlideIndex - 1) : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          backgroundColor: Colors.white.withOpacity(0.1),
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.white.withValues(alpha: 0.02),
+                          disabledBackgroundColor: Colors.white.withOpacity(0.02),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         child: const Text("Previous", style: TextStyle(fontSize: 12)),
@@ -498,7 +498,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                                   decoration: BoxDecoration(
                                     color: isCurrent
                                         ? accentText
-                                        : (isQuiz ? Colors.redAccent.withValues(alpha: 0.4) : Colors.white30),
+                                        : (isQuiz ? Colors.redAccent.withOpacity(0.4) : Colors.white30),
                                     borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
@@ -873,7 +873,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                       width: 100,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.indigoAccent : Colors.white.withValues(alpha: 0.05),
+                        color: isSelected ? Colors.indigoAccent : Colors.white.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: isSelected ? Colors.white : Colors.white10),
                       ),
@@ -1342,7 +1342,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                     icon: const Icon(Icons.fullscreen_exit),
                     label: const Text("Exit Full Screen"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      backgroundColor: Colors.white.withOpacity(0.1),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),

@@ -169,9 +169,9 @@ class PPTThemeHelper {
             surface: Color(0xFF1E293B),
             onSurface: Colors.white,
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF1E293B),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          cardTheme: const CardTheme(
+            color: Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
@@ -196,9 +196,9 @@ class PPTThemeHelper {
             surface: Color(0xFF27272A),
             onSurface: Color(0xFFFEF3C7),
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF27272A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          cardTheme: const CardTheme(
+            color: Color(0xFF27272A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
@@ -223,11 +223,11 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Color(0xFFE879F9),
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF111114),
+          cardTheme: const CardTheme(
+            color: Color(0xFF111114),
             shape: BeveledRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Color(0xFFD946EF), width: 0.5),
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              side: BorderSide(color: Color(0xFFD946EF), width: 0.5),
             ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
@@ -253,11 +253,11 @@ class PPTThemeHelper {
             surface: Color(0xFF262626),
             onSurface: Colors.white,
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF262626),
+          cardTheme: const CardTheme(
+            color: Color(0xFF262626),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0),
-              side: const BorderSide(color: Colors.white24),
+              borderRadius: BorderRadius.zero,
+              side: BorderSide(color: Colors.white24),
             ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
@@ -283,9 +283,9 @@ class PPTThemeHelper {
             surface: Color(0xFF2E2A24),
             onSurface: Color(0xFFECFCCB),
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF292524),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          cardTheme: const CardTheme(
+            color: Color(0xFF292524),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
@@ -311,9 +311,9 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Colors.white,
           ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF18181B),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          cardTheme: const CardTheme(
+            color: Color(0xFF18181B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(

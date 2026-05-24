@@ -169,7 +169,7 @@ class PPTThemeHelper {
             surface: Color(0xFF1E293B),
             onSurface: Colors.white,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF1E293B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
@@ -196,7 +196,7 @@ class PPTThemeHelper {
             surface: Color(0xFF27272A),
             onSurface: Color(0xFFFEF3C7),
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF27272A),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           ),
@@ -223,7 +223,7 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Color(0xFFE879F9),
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF111114),
             shape: BeveledRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -253,7 +253,7 @@ class PPTThemeHelper {
             surface: Color(0xFF262626),
             onSurface: Colors.white,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF262626),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
@@ -283,7 +283,7 @@ class PPTThemeHelper {
             surface: Color(0xFF2E2A24),
             onSurface: Color(0xFFECFCCB),
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF292524),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
@@ -311,7 +311,7 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Colors.white,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF18181B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),

@@ -29,9 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (subjects.isNotEmpty) {
         _selectedSubject = subjects[0];
         final chapters = _selectedSubject!['chapters'] as List;
-        if (chapters.isNotEmpty) {
-          _selectedChapter = chapters[0];
-        }
+        _selectedChapter = _getFirstChapterWithTopics(chapters);
       }
     }
   }
@@ -43,7 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _selectedSubject = subjects.isNotEmpty ? subjects[0] : null;
       if (_selectedSubject != null) {
         final chapters = _selectedSubject!['chapters'] as List;
-        _selectedChapter = chapters.isNotEmpty ? chapters[0] : null;
+        _selectedChapter = _getFirstChapterWithTopics(chapters);
       } else {
         _selectedChapter = null;
       }
@@ -54,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedSubject = sub;
       final chapters = sub['chapters'] as List;
-      _selectedChapter = chapters.isNotEmpty ? chapters[0] : null;
+      _selectedChapter = _getFirstChapterWithTopics(chapters);
     });
   }
 
@@ -62,6 +60,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedChapter = chap;
     });
+  }
+
+  // Helper to find the first chapter with data
+  Map<String, dynamic>? _getFirstChapterWithTopics(List chapters) {
+    if (chapters.isEmpty) return null;
+    try {
+      return chapters.firstWhere(
+        (chap) => (chap['topics'] as List).isNotEmpty,
+      );
+    } catch (e) {
+      // Fallback safely to the absolute first chapter if none have data yet
+      return chapters[0];
+    }
   }
 
   @override
@@ -469,12 +480,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 12),
 
               if (filteredTopics.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text("No matched topics found inside this chapter.", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  ),
-                )
+                _buildEmptyState(context)
               else
                 ListView.builder(
                   shrinkWrap: true,
@@ -546,6 +552,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  // Professional Empty State Widget
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F0F13),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.auto_awesome_motion, size: 48, color: Colors.grey.withOpacity(0.2)),
+          const SizedBox(height: 16),
+          const Text(
+            "No Decks Populated Yet",
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "We haven't uploaded presentation decks for this specific chapter yet.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey, fontSize: 12, height: 1.5),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green.withOpacity(0.2)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lightbulb_outline, color: Colors.greenAccent, size: 16),
+                SizedBox(width: 8),
+                Text(
+                  "Tip: Look for the green 'TOPICS' badge in the directory!",
+                  style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

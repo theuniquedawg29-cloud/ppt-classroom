@@ -16,7 +16,7 @@ import '../models/ppt_models.dart';
 class SlidePlayerScreen extends StatefulWidget {
   final PPTTopic topic;
   final String preferredLayout;
-  const SlidePlayerScreen({Key? key, required this.topic, this.preferredLayout = 'standard'}) : super(key: key);
+  const SlidePlayerScreen({super.key, required this.topic, this.preferredLayout = 'standard'});
 
   @override
   State<SlidePlayerScreen> createState() => _SlidePlayerScreenState();
@@ -148,7 +148,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                       padding: const EdgeInsets.only(bottom: 15.0),
                       child: Text(
                         "Created by Santosh TechWorks | Slide ${i + 1} of $_totalSlides",
-                        style: const TextStyle(color: Colors.white24, fontSize: 10),
+                        style: const TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                     ),
                   ],
@@ -238,17 +238,21 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
     try {
       final downloadsDir = await getDownloadsDirectory();
       if (downloadsDir != null) {
-        final file = File('${downloadsDir.path}/$fileName');
+        final filePath = '${downloadsDir.path}/$fileName';
+        final file = File(filePath);
         await file.writeAsBytes(bytes);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Saved to Downloads: $fileName"),
-              duration: const Duration(seconds: 5),
+              duration: const Duration(seconds: 10),
               action: SnackBarAction(
-                label: "Open Folder",
+                label: "Open File",
                 textColor: Colors.amberAccent,
-                onPressed: () => launchUrl(Uri.parse("file://${downloadsDir.path}")),
+                onPressed: () {
+                  final fileUri = Uri.file(file.absolute.path);
+                  launchUrl(fileUri, mode: LaunchMode.externalApplication);
+                },
               ),
             ),
           );
@@ -429,37 +433,42 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               children: [
                 // PRIMARY SLIDE PAGEVIEW
                 Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (idx) {
-                      setState(() {
-                        _currentSlideIndex = idx;
-                      });
-                    },
-                    itemCount: _totalSlides,
-                    itemBuilder: (context, index) {
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: Padding(
-                                key: ValueKey("slide_$index"),
-                                padding: const EdgeInsets.all(16.0),
-                                child: _buildSlideContent(index, themeData),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1000),
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (idx) {
+                          setState(() {
+                            _currentSlideIndex = idx;
+                          });
+                        },
+                        itemCount: _totalSlides,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: [
+                              Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: Padding(
+                                    key: ValueKey("slide_$index"),
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: _buildSlideContent(index, themeData),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              "Created by Santosh TechWorks",
-                              style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  "Created by Santosh TechWorks",
+                                  style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
 
@@ -573,7 +582,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
             widget.topic.title,
             style: TextStyle(
               color: theme.colorScheme.primary,
-              fontSize: 14,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -581,8 +590,8 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
           Text(
             widget.topic.description,
             style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 11,
+              color: Colors.grey[300],
+              fontSize: 13,
             ),
           ),
         ],
@@ -627,28 +636,28 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               ),
               child: Text(
                 intro.subtitle.toUpperCase(),
-                style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               intro.title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2),
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2),
             ),
             const SizedBox(height: 16),
             Text(
               intro.content,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[300], fontSize: 13, height: 1.5),
+              style: TextStyle(color: Colors.grey[200], fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 24),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.star, color: Colors.amber, size: 16),
                 SizedBox(width: 6),
-                Text("Key Concepts covered:", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text("Key Concepts covered:", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
               ],
             ),
             const SizedBox(height: 10),
@@ -658,7 +667,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               alignment: WrapAlignment.center,
               children: intro.keyConcepts.map((concept) {
                 return Chip(
-                  label: Text(concept, style: const TextStyle(fontSize: 10)),
+                  label: Text(concept, style: const TextStyle(fontSize: 12)),
                   backgroundColor: Colors.white.withOpacity(0.04),
                   side: const BorderSide(color: Colors.white12),
                 );
@@ -823,7 +832,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               flex: 2,
               child: Text(
                 exp.content,
-                style: const TextStyle(fontSize: 13, height: 1.8, fontStyle: FontStyle.italic),
+                style: const TextStyle(fontSize: 16, height: 1.8, fontStyle: FontStyle.italic),
               ),
             ),
             const SizedBox(width: 24),
@@ -1035,13 +1044,13 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item['title'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(item['title'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                       const SizedBox(height: 4),
-                      Text(item['desc'] ?? item['description'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 10, height: 1.3)),
+                      Text(item['desc'] ?? item['description'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 12, height: 1.3)),
                     ],
                   ),
                 );
-              }).toList()
+              })
             ],
           ),
         ),
@@ -1314,7 +1323,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                   child: Text(
                     "Video playback is not supported on Windows Desktop yet.\nUse the web version or open externally.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.amber, fontSize: 13),
+                    style: TextStyle(color: Colors.amber, fontSize: 16),
                   ),
                 ),
               )
@@ -1427,7 +1436,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               // QUESTION
               Text(
                 quiz.question,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
               ),
               const SizedBox(height: 16),
 
@@ -1489,8 +1498,8 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                             child: Text(
                               quiz.options[optIdx],
                               style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.grey[300],
-                                fontSize: 12,
+                                color: isSelected ? Colors.white : Colors.grey[200],
+                                fontSize: 14,
                               ),
                             ),
                           ),
@@ -1583,7 +1592,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                         Expanded(
                           child: Text(
                             takeaway,
-                            style: TextStyle(color: Colors.grey[300], fontSize: 12, height: 1.4),
+                            style: TextStyle(color: Colors.grey[200], fontSize: 16, height: 1.4),
                           ),
                         ),
                       ],
@@ -1625,11 +1634,11 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                     children: [
                       const Text("CLASSROOM ASSIGNMENT:", style: TextStyle(color: Color(0xFFA3E635), fontSize: 9, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(summary.classroomActivity, style: const TextStyle(color: Colors.white, fontSize: 11, height: 1.3)),
+                      Text(summary.classroomActivity, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.3)),
                       const SizedBox(height: 10),
-                      const Text("DID YOU KNOW?", style: TextStyle(color: Colors.indigoAccent, fontSize: 9, fontWeight: FontWeight.bold)),
+                      const Text("DID YOU KNOW?", style: TextStyle(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(summary.quickFact, style: TextStyle(color: Colors.grey[350], fontSize: 11, height: 1.3)),
+                      Text(summary.quickFact, style: TextStyle(color: Colors.grey[200], fontSize: 14, height: 1.3)),
                     ],
                   ),
                 )

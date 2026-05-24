@@ -131,8 +131,15 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 30.0),
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 900),
-                            child: _buildSlideContent(i, themeData),
+                            constraints: const BoxConstraints(maxWidth: 800),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildSlideHeader(themeData),
+                                const SizedBox(height: 12),
+                                _getSlideBody(i, themeData, widget.topic.explanations.length, widget.topic.quizzes.length),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -437,6 +444,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                             child: AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
                               child: Padding(
+                                key: ValueKey("slide_$index"),
                                 padding: const EdgeInsets.all(16.0),
                                 child: _buildSlideContent(index, themeData),
                               ),

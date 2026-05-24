@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "504967218544",
+    "project_id": "stw-ppt-generator",
+    "storage_bucket": "stw-ppt-generator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:504967218544:android:6a97ea389a08f7adc2bbb5",
+        "android_client_info": {
+          "package_name": "com.example.interactive_ppt_classroom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaPeS2pYVH39cPEgbHhv29alJG73ZZSjA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

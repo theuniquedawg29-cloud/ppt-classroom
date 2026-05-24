@@ -10,6 +10,7 @@ import 'package:flutter_pptx/flutter_pptx.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import '../models/ppt_models.dart';
+import '../services/firebase_service.dart';
 // Note: Conditional imports would be cleaner for a production app,
 // but for this pivot, we are prioritizing web-first logic.
 
@@ -247,7 +248,20 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
     );
 
     try {
-      final String? webLink = await _uploadToFileIo(bytes, fileName);
+      // Prioritize Firebase Storage, fallback to file.io if needed or preferred
+      String? webLink = await FirebaseService.uploadPPTX(
+        bytes, 
+        fileName,
+        title: widget.topic.title,
+        description: widget.topic.description,
+      );
+      
+      // If firebase fails (e.g. not configured), fallback to file.io for now
+      if (webLink == null) {
+        debugPrint("Firebase upload failed or not configured, trying file.io fallback...");
+        webLink = await _uploadToFileIo(bytes, fileName);
+      }
+
       if (context.mounted) Navigator.pop(context);
 
       if (webLink != null) {

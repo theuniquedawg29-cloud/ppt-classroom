@@ -4,14 +4,14 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io' show File, Platform, Directory;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter_pptx/flutter_pptx.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import '../models/ppt_models.dart';
+// Note: Conditional imports would be cleaner for a production app,
+// but for this pivot, we are prioritizing web-first logic.
 
 class SlidePlayerScreen extends StatefulWidget {
   final PPTTopic topic;
@@ -193,83 +193,27 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
             child: Text("Presentation Ready", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
           ),
           ListTile(
-            leading: const Icon(Icons.share, color: Colors.indigoAccent),
-            title: const Text("Share as File (PPTX)", style: TextStyle(color: Colors.white)),
-            subtitle: const Text("Best for offline editing in MS PowerPoint", style: TextStyle(color: Colors.grey, fontSize: 11)),
-            onTap: () async {
+            leading: const Icon(Icons.download, color: Colors.amberAccent),
+            title: const Text("Download PPTX Directly", style: TextStyle(color: Colors.white)),
+            subtitle: const Text("Saves the presentation to your local machine", style: TextStyle(color: Colors.grey, fontSize: 11)),
+            onTap: () {
               Navigator.pop(context);
-              await _shareAsFile(bytes, fileName);
+              _downloadWeb(bytes, fileName);
             },
           ),
           ListTile(
             leading: const Icon(Icons.cloud_done, color: Colors.greenAccent),
-            title: const Text("Open on Web (Google Slides Link)", style: TextStyle(color: Colors.white)),
-            subtitle: const Text("Generates a link to view presentation online", style: TextStyle(color: Colors.grey, fontSize: 11)),
+            title: const Text("Open on Web (Google Slides Viewer)", style: TextStyle(color: Colors.white)),
+            subtitle: const Text("Generates a temporary cloud link for viewing", style: TextStyle(color: Colors.grey, fontSize: 11)),
             onTap: () async {
               Navigator.pop(context);
               _handleWebExport(context, bytes, fileName);
             },
           ),
-          if (kIsWeb)
-            ListTile(
-              leading: const Icon(Icons.download, color: Colors.amberAccent),
-              title: const Text("Download Directly", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _downloadWeb(bytes, fileName);
-              },
-            ),
-          if (!kIsWeb && Platform.isWindows)
-            ListTile(
-              leading: const Icon(Icons.download, color: Colors.amberAccent),
-              title: const Text("Save to Downloads Folder", style: TextStyle(color: Colors.white)),
-              onTap: () async {
-                Navigator.pop(context);
-                await _saveToWindowsDownloads(bytes, fileName, context);
-              },
-            ),
           const SizedBox(height: 30),
         ],
       ),
     );
-  }
-
-  Future<void> _saveToWindowsDownloads(Uint8List bytes, String fileName, BuildContext context) async {
-    try {
-      final downloadsDir = await getDownloadsDirectory();
-      if (downloadsDir != null) {
-        final filePath = '${downloadsDir.path}/$fileName';
-        final file = File(filePath);
-        await file.writeAsBytes(bytes);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Saved to Downloads: $fileName"),
-              duration: const Duration(seconds: 10),
-              action: SnackBarAction(
-                label: "Open File",
-                textColor: Colors.amberAccent,
-                onPressed: () {
-                  final fileUri = Uri.file(file.absolute.path);
-                  launchUrl(fileUri, mode: LaunchMode.externalApplication);
-                },
-              ),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to save: $e")));
-      }
-    }
-  }
-
-  Future<void> _shareAsFile(Uint8List bytes, String fileName) async {
-    final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/$fileName');
-    await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], text: 'Check out this presentation: ${widget.topic.title}');
   }
 
   void _downloadWeb(Uint8List bytes, String fileName) {
@@ -1316,55 +1260,41 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            if (!kIsWeb && Platform.isWindows)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Text(
-                    "Video playback is not supported on Windows Desktop yet.\nUse the web version or open externally.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.amber, fontSize: 16),
-                  ),
-                ),
-              )
-            else
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: YoutubePlayer(
-                    controller: _ytController!,
-                  ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: YoutubePlayer(
+                  controller: _ytController!,
                 ),
               ),
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (!(!kIsWeb && Platform.isWindows))
-                  ElevatedButton.icon(
-                    onPressed: () => _ytController?.enterFullScreen(),
-                    icon: const Icon(Icons.fullscreen),
-                    label: const Text("Full Screen"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
+                ElevatedButton.icon(
+                  onPressed: () => _ytController?.enterFullScreen(),
+                  icon: const Icon(Icons.fullscreen),
+                  label: const Text("Full Screen"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                if (!(!kIsWeb && Platform.isWindows)) const SizedBox(width: 8),
-                if (!(!kIsWeb && Platform.isWindows))
-                  ElevatedButton.icon(
-                    onPressed: () => _ytController?.exitFullScreen(),
-                    icon: const Icon(Icons.fullscreen_exit),
-                    label: const Text("Exit Full Screen"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.1),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () => _ytController?.exitFullScreen(),
+                  icon: const Icon(Icons.fullscreen_exit),
+                  label: const Text("Exit Full Screen"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                if (!(!kIsWeb && Platform.isWindows)) const SizedBox(width: 8),
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
                     final videoId = YoutubePlayerController.convertUrlToId(widget.topic.youtubeId) ?? widget.topic.youtubeId;

@@ -169,7 +169,7 @@ class PPTThemeHelper {
             surface: Color(0xFF1E293B),
             onSurface: Colors.white,
           ),
-          cardTheme: const CardTheme(
+          cardTheme: const CardThemeData(
             color: Color(0xFF1E293B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
           ),
@@ -187,29 +187,32 @@ class PPTThemeHelper {
         );
       case 'sunset-minimal':
         return ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF18181B),
-          primaryColor: const Color(0xFFF59E0B),
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFFF59E0B),
-            secondary: Color(0xFFEC4899),
-            surface: Color(0xFF27272A),
-            onSurface: Color(0xFFFEF3C7),
+          brightness: Brightness.light,
+          scaffoldBackgroundColor: const Color(0xFFFFF8E1), // Warm Amber 50
+          primaryColor: const Color(0xFFF57C00), // Orange 700
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFFF57C00),
+            secondary: Color(0xFFD81B60), // Pink 600
+            surface: Colors.white,
+            onSurface: Color(0xFF3E2723), // Brown 900
           ),
-          cardTheme: const CardTheme(
-            color: Color(0xFF27272A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+          cardTheme: CardThemeData(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            elevation: 5,
+            shadowColor: const Color(0xFFF57C00).withOpacity(0.2),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF59E0B),
-              foregroundColor: Colors.black,
+              backgroundColor: const Color(0xFFF57C00),
+              foregroundColor: Colors.white,
               shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
           textTheme: const TextTheme(
-            titleLarge: TextStyle(fontFamily: 'Playfair Display', fontWeight: FontWeight.bold, color: Color(0xFFFEF3C7)),
-            bodyMedium: TextStyle(fontFamily: 'Inter', color: Color(0xFFD4D4D8)),
+            titleLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w900, color: Color(0xFF3E2723), fontSize: 28),
+            bodyMedium: TextStyle(fontFamily: 'Inter', color: Color(0xFF4E342E), fontSize: 16, height: 1.6),
           ),
         );
       case 'cyberpunk':
@@ -223,7 +226,7 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Color(0xFFE879F9),
           ),
-          cardTheme: const CardTheme(
+          cardTheme: const CardThemeData(
             color: Color(0xFF111114),
             shape: BeveledRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -244,32 +247,34 @@ class PPTThemeHelper {
         );
       case 'monochrome':
         return ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF171717),
-          primaryColor: Colors.white,
-          colorScheme: const ColorScheme.dark(
-            primary: Colors.white,
-            secondary: Color(0xFF737373),
-            surface: Color(0xFF262626),
-            onSurface: Colors.white,
+          brightness: Brightness.light,
+          scaffoldBackgroundColor: const Color(0xFFF5F5F4), // Warm Stone 100
+          primaryColor: const Color(0xFF1C1917), // Stone 900
+          colorScheme: const ColorScheme.light(
+            primary: Color(0xFF1C1917),
+            secondary: Color(0xFF57534E), // Stone 600
+            surface: Colors.white,
+            onSurface: Color(0xFF1C1917),
           ),
-          cardTheme: const CardTheme(
-            color: Color(0xFF262626),
+          cardTheme: CardThemeData(
+            color: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.zero,
-              side: BorderSide(color: Colors.white24),
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Color(0xFFE7E5E4), width: 1.5),
             ),
+            elevation: 2,
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+              backgroundColor: const Color(0xFF1C1917),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
           textTheme: const TextTheme(
-            titleLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w300, letterSpacing: 1.5, color: Colors.white),
-            bodyMedium: TextStyle(fontFamily: 'Inter', color: Color(0xFFD4D4D8)),
+            titleLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w800, color: Color(0xFF1C1917), fontSize: 26, letterSpacing: -0.5),
+            bodyMedium: TextStyle(fontFamily: 'Inter', color: Color(0xFF292524), fontSize: 16, height: 1.6),
           ),
         );
       case 'forest-organic':
@@ -283,7 +288,7 @@ class PPTThemeHelper {
             surface: Color(0xFF2E2A24),
             onSurface: Color(0xFFECFCCB),
           ),
-          cardTheme: const CardTheme(
+          cardTheme: const CardThemeData(
             color: Color(0xFF292524),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
           ),
@@ -311,7 +316,7 @@ class PPTThemeHelper {
             surface: Color(0xFF18181B),
             onSurface: Colors.white,
           ),
-          cardTheme: const CardTheme(
+          cardTheme: const CardThemeData(
             color: Color(0xFF18181B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
           ),

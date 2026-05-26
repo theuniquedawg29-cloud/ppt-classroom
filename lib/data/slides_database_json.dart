@@ -1451,7 +1451,181 @@ class SlidesDatabaseJson {
 }
             ]
           },
-          { "id": "c10-s-2", "name": "Chapter 2: Acids, Bases and Salts", "description": "Chemical properties, indicators, and pH scale.", "topics": [] },
+          {
+      "id": "c10-s-2",
+      "name": "Chapter 2: Life Processes",
+      "description": "Exploration of fundamental biological processes required for maintaining life, including nutrition, respiration, transportation, and excretion.",
+      "topics": [
+        {
+          "id": "ncert-ch2-introduction-life-processes",
+          "title": "Introduction to Life Processes",
+          "description": "Understand the criteria used to decide whether something is alive and explore the core maintenance functions essential for survival.",
+          "themeId": "ocean-tech",
+          "intro": {
+            "title": "Introduction to Life Processes",
+            "subtitle": "NCERT Class 10 Science - Chapter 2",
+            "content": "Living organisms perform a variety of fundamental functions to maintain their structure and survive. Discover the essential criteria that define life and the vital processes that keep organisms alive and functioning.",
+            "keyConcepts": [
+              "Criteria for Being Alive",
+              "Molecular Movements",
+              "Life Maintenance Functions",
+              "Energy Requirements"
+            ]
+          },
+          "explanations": [
+            {
+              "title": "What is a Life Process?",
+              "subtitle": "Defining the Living State",
+              "content": "The basic functions performed by living organisms to maintain and sustain their life on Earth are called life processes. Even when an organism is resting, sleeping, or not doing any visible activity, maintenance work is continuously going on at the cellular level. These processes are not isolated events; they work in tandem to prevent damage and breakdown of bodily structures. Without these continuous maintenance mechanisms, an organism cannot sustain its structural integrity and will eventually die. Examples of core life processes include nutrition, respiration, transportation, and excretion.",
+              "imageUrl": "assets/life_processes_overview.png",
+              "interactiveWidget": {
+                "type": "interactive-cards",
+                "config": {
+                  "items": [
+                    {
+                      "title": "Maintenance Work",
+                      "description": "Living structures are highly organized into tissues and cells, which tend to break down over time due to environmental influences. Continuous maintenance and repairing processes are required to keep these structures functional, preventing cellular breakdown even when the organism is completely stationary."
+                    },
+                    {
+                      "title": "Molecular Movements",
+                      "description": "Visible movements like walking, breathing, or growing are obvious signs of life, but invisible molecular movements happening inside cells are the true indicators of living organisms. These continuous movements of molecules are essential for repairing and maintaining cellular structures."
+                    },
+                    {
+                      "title": "Energy Consumption",
+                      "description": "Since living organisms are constantly working against natural breakdown, they require a regular supply of energy. This energy must come from outside the organism's body in the form of food, which is then broken down internally to power various life-sustaining maintenance activities."
+                    },
+                    {
+                      "title": "Damage Prevention",
+                      "description": "Life processes act as a shield against wear and tear. If these processes slow down or stop, the organized structure of the living body collapses. Therefore, constant molecular maintenance is indispensable to prevent systemic damage and guarantee individual survival."
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "title": "Criteria to Decide Whether Something is Alive",
+              "subtitle": "Visible vs. Invisible Signs of Life",
+              "content": "We often use visible movements like walking, breathing, running, or chewing cud as evidence of life. Growth is another common criterion; a seed germinates and grows into a plant over several days. However, a living organism can be alive without showing obvious visible movements, such as a sleeping animal or a plant that doesn't look green. This is why invisible molecular movements are considered the ultimate and most reliable scientific criterion for deciding whether something is alive. For instance, viruses show no molecular movement until they infect a host cell, making their status as 'living' a subject of scientific debate.",
+              "imageUrl": "assets/living_vs_nonliving.png",
+              "interactiveWidget": {
+                "type": "interactive-cards",
+                "config": {
+                  "items": [
+                    {
+                      "title": "Visible Movements",
+                      "description": "Obvious physical actions such as walking, running, crying, or a plant bending towards light are direct signs of life. While easily observable, visible movements are not sufficient on their own, as many organisms can stay perfectly still while remaining completely alive."
+                    },
+                    {
+                      "title": "Growth-Related Movements",
+                      "description": "In plants, life is often manifested through growth. A seed germinating and pushing through the soil is a clear movement indicating life. If a plant's growth is stopped, these movements cease, but the plant may still remain alive for a long period."
+                    },
+                    {
+                      "title": "Invisible Molecular Movements",
+                      "description": "The most fundamental proof of life happens at a microscopic level. Molecules must move constantly within cells to transport nutrients, fix cellular components, and conduct metabolic tasks. The complete absence of molecular movement signifies death."
+                    },
+                    {
+                      "title": "The Virus Dilemma",
+                      "description": "Viruses represent a unique borderline case because they do not exhibit any molecular movement inside themselves until they infect a living cell. Because they rely entirely on the host's cellular machinery to replicate, scientists debate whether they are truly alive or non-living."
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "title": "Core Functionalities Needed for Maintenance",
+              "subtitle": "The Four Pillar Systems of Life",
+              "content": "To survive, all living organisms rely on four interconnected core functionalities that work together seamlessly. First, Nutrition involves taking in food as an external source of energy and breaking it down into usable forms. Second, Respiration is the chemical process of acquiring oxygen from the environment to break down organic food molecules and release energy for cellular work. Third, Transportation ensures that nutrients, oxygen, and metabolic products are carried from one part of the body to another. Finally, Excretion safely removes toxic metabolic by-products, such as nitrogenous wastes, from the body to maintain chemical balance.",
+              "imageUrl": "assets/core_functionalities.png",
+              "interactiveWidget": {
+                "type": "interactive-cards",
+                "config": {
+                  "items": [
+                    {
+                      "title": "Nutrition",
+                      "description": "The process of transferring an energy source (food) from outside into the body. This food is broken down into uniform smaller molecules that can be utilized for energy, body growth, and structure maintenance."
+                    },
+                    {
+                      "title": "Respiration",
+                      "description": "The process by which organisms take in oxygen from the environment and use it inside cells to break down food molecules (like glucose) to release energy. This cellular energy powers all vital metabolic tasks."
+                    },
+                    {
+                      "title": "Transportation",
+                      "description": "In complex multicellular organisms, the sites where food and oxygen are absorbed are distant from the cells that need them. Transportation is the system that carries food, gases, and water throughout the body."
+                    },
+                    {
+                      "title": "Excretion",
+                      "description": "Chemical reactions that generate energy often create harmful, toxic waste products (like urea or carbon dioxide) that are useless to cells. Excretion is the mechanism that filters and discards these waste products from the body."
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "youtubeId": "https://www.youtube.com/watch?v=zmdxMlb88Fs",
+          "quizzes": [
+            {
+              "type": "CONCEPTUAL",
+              "question": "Which of the following is considered the ultimate scientific criterion to decide whether something is alive?",
+              "options": [
+                "Visible physical growth",
+                "Invisible molecular movements",
+                "The ability to run fast",
+                "Having green leaves"
+              ],
+              "correctIndex": 1,
+              "explanation": "Invisible molecular movements are the true indicator of life because physical movements might not be visible in sleeping organisms or certain plants, but cellular repairs and molecular shifts happen continuously."
+            },
+            {
+              "type": "SKILL BASED",
+              "question": "Why do living organisms require a continuous supply of external energy (food)?",
+              "options": [
+                "To increase their weight constantly",
+                "To prevent the natural breakdown of their highly organized structure",
+                "To avoid the process of respiration",
+                "To change their biological taxonomy"
+              ],
+              "correctIndex": 1,
+              "explanation": "Living systems are highly organized and subject to environmental wear and tear. External energy is necessary to fuel the continuous repair and maintenance required to sustain life."
+            },
+            {
+              "type": "REAL LIFE APPLICATION",
+              "question": "Why do viruses fall into a grey area regarding whether they are truly 'alive' or 'dead'?",
+              "options": [
+                "They do not breathe oxygen from the air",
+                "They are too small to be seen under ordinary microscopes",
+                "They do not show any molecular movement until they infect a host cell",
+                "They cannot move from one location to another on their own"
+              ],
+              "correctIndex": 2,
+              "explanation": "Viruses do not perform independent molecular movements or metabolism. They only display characteristics of life when they use a host organism's cellular machinery to replicate."
+            },
+            {
+              "type": "HOTS",
+              "question": "Which core functionality is responsible for removing toxic chemical by-products generated during cellular respiration?",
+              "options": [
+                "Nutrition",
+                "Transportation",
+                "Excretion",
+                "Growth"
+              ],
+              "correctIndex": 2,
+              "explanation": "Excretion is the dedicated biological process that removes hazardous nitrogenous and metabolic wastes from the body to prevent cellular poisoning."
+            }
+          ],
+          "summary": {
+            "title": "Introduction to Life Processes Summary",
+            "keyTakeaways": [
+              "Life processes are fundamental maintenance activities required to protect living systems from structural breakdown.",
+              "Invisible molecular movements inside cells serve as the most accurate benchmark to establish the living state.",
+              "Nutrition supplies raw materials, Respiration releases energy from those materials, Transportation moves substances, and Excretion disposes of dangerous chemical wastes.",
+              "Multicellular organisms require specialized systems for transport and excretion because simple diffusion is insufficient to meet the needs of deep-seated cells."
+            ],
+            "classroomActivity": "Ask students to work in groups of three. Give them a list of entities (e.g., a sleeping dog, a dried seed, a computer virus, a green leaf, a car). Have them apply the criteria discussed—such as visible movement, growth, and molecular movement—to categorize each as living, non-living, or a borderline case, explaining their scientific reasoning to the class.",
+            "quickFact": "Even when you are fast asleep and completely motionless, your body consumes energy to maintain basic metabolic activity, pump blood, and keep your cellular repair systems running."
+          }
+        }
+      ]
+    },
           { "id": "c10-s-3", "name": "Chapter 3: Metals and Non-metals", "description": "Physical and chemical properties, extraction of metals.", "topics": [] },
           { "id": "c10-s-4", "name": "Chapter 4: Carbon and its Compounds", "description": "Versatile nature of carbon, homologous series, and functional groups.", "topics": [] },
           { "id": "c10-s-5", "name": "Chapter 5: Life Processes", "description": "Nutrition, respiration, transportation, and excretion in plants and animals.", "topics": [] },

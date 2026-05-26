@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/dashboard_screen.dart';
 import 'models/ppt_models.dart';
+import 'vigyaan_agent.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +17,14 @@ void main() async {
     debugPrint("Firebase initialization failed: $e");
   }
 
-  runApp(const InteractivePPTApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => VigyaanAgent()),
+      ],
+      child: const InteractivePPTApp(),
+    ),
+  );
 }
 
 class InteractivePPTApp extends StatelessWidget {

@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter_pptx/flutter_pptx.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../models/ppt_models.dart';
 import '../services/firebase_service.dart';
+import '../vigyaan_agent.dart';
 // Note: Conditional imports would be cleaner for a production app,
 // but for this pivot, we are prioritizing web-first logic.
 
@@ -338,173 +338,359 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
-      valueListenable: appThemeNotifier,
-      builder: (context, themeId, child) {
-        final themeData = PPTThemeHelper.getThemeData(themeId);
-        final accentText = themeData.colorScheme.primary;
+    return Consumer<VigyaanAgent>(
+      builder: (context, agent, child) {
+        return ValueListenableBuilder<String>(
+          valueListenable: appThemeNotifier,
+          builder: (context, themeId, child) {
+            final themeData = PPTThemeHelper.getThemeData(themeId);
+            final accentText = themeData.colorScheme.primary;
 
-        return Theme(
-          data: themeData,
-          child: Scaffold(
-            backgroundColor: themeData.scaffoldBackgroundColor,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: Text(
-                widget.topic.title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.layers, color: Colors.white, size: 20),
-                  tooltip: "Switch Layout",
-                  onPressed: () => _showLiveLayoutSwitcher(context),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.download_for_offline, color: Colors.white),
-                  tooltip: "Export PPTX Presentation",
-                  onPressed: () => _downloadPPTX(context),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+            return Theme(
+              data: themeData,
+              child: Scaffold(
+                backgroundColor: themeData.scaffoldBackgroundColor,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () {
+                      if (agent.mode == VigyaanMode.classroomTutor) {
+                        agent.deactivateTutor();
+                      }
+                      Navigator.pop(context);
+                    },
                   ),
-                  child: Center(
-                    child: Text(
-                      "Slide ${_currentSlideIndex + 1} / $_totalSlides",
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  title: Text(
+                    widget.topic.title,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  actions: [
+                    // VIGYAAN AGENT ACTIVATION BUTTON
+                    IconButton(
+                      icon: Icon(
+                        agent.mode == VigyaanMode.classroomTutor ? Icons.voice_over_off : Icons.record_voice_over,
+                        color: agent.mode == VigyaanMode.classroomTutor ? Colors.redAccent : Colors.greenAccent,
+                      ),
+                      tooltip: agent.mode == VigyaanMode.classroomTutor ? "Stop VIGYAAN Tutor" : "Start VIGYAAN Tutor",
+                      onPressed: () {
+                        if (agent.mode == VigyaanMode.classroomTutor) {
+                          agent.deactivateTutor();
+                        } else {
+                          agent.activateClassroomTutor(widget.topic, _pageController);
+                        }
+                      },
                     ),
-                  ),
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // PRIMARY SLIDE PAGEVIEW
-                Expanded(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1000),
-                      child: PageView.builder(
-                        controller: _pageController,
-                        onPageChanged: (idx) {
-                          setState(() {
-                            _currentSlideIndex = idx;
-                          });
-                        },
-                        itemCount: _totalSlides,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              Expanded(
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Padding(
-                                    key: ValueKey("slide_$index"),
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: _buildSlideContent(index, themeData),
-                                  ),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  "Created by Santosh TechWorks",
-                                  style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                    if (agent.mode == VigyaanMode.classroomTutor)
+                      IconButton(
+                        icon: Icon(
+                          agent.showCaptions ? Icons.closed_caption : Icons.closed_caption_disabled,
+                          color: agent.showCaptions ? Colors.indigoAccent : Colors.grey,
+                        ),
+                        tooltip: agent.showCaptions ? "Hide Captions" : "Show Captions",
+                        onPressed: () => agent.toggleCaptions(),
                       ),
+                    IconButton(
+                      icon: const Icon(Icons.layers, color: Colors.white, size: 20),
+                      tooltip: "Switch Layout",
+                      onPressed: () => _showLiveLayoutSwitcher(context),
                     ),
-                  ),
-                ),
-
-                // NAVIGATION AND DOTS BAR
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    border: const Border(top: BorderSide(color: Colors.white10)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Previous button
-                      ElevatedButton(
-                        onPressed: _currentSlideIndex > 0 ? () => _navigateToSlide(_currentSlideIndex - 1) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white.withOpacity(0.1),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.white.withOpacity(0.02),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: const Text("Previous", style: TextStyle(fontSize: 12)),
+                    IconButton(
+                      icon: const Icon(Icons.download_for_offline, color: Colors.white),
+                      tooltip: "Export PPTX Presentation",
+                      onPressed: () => _downloadPPTX(context),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                       ),
-
-                      // Horizontal navigation indicator dots
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(_totalSlides, (i) {
-                              final isCurrent = i == _currentSlideIndex;
-                              final quizStartIndex = 2 + widget.topic.explanations.length;
-                              final quizEndIndex = 1 + widget.topic.explanations.length + widget.topic.quizzes.length;
-                              final isQuiz = i >= quizStartIndex && i <= quizEndIndex;
-                              
-                              return InkWell(
-                                onTap: () => _navigateToSlide(i),
-                                child: Container(
-                                  width: isCurrent ? 12 : 6,
-                                  height: 6,
-                                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                                  decoration: BoxDecoration(
-                                    color: isCurrent
-                                        ? accentText
-                                        : (isQuiz ? Colors.redAccent.withOpacity(0.4) : Colors.white30),
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      ),
-
-                      // Next button
-                      ElevatedButton(
-                        onPressed: _currentSlideIndex < _totalSlides - 1 ? () => _navigateToSlide(_currentSlideIndex + 1) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: themeData.colorScheme.primary,
-                          foregroundColor: themeData.colorScheme.onPrimary,
-                          disabledBackgroundColor: Colors.white.withOpacity(0.02),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
+                      child: Center(
                         child: Text(
-                          _currentSlideIndex == _totalSlides - 1 ? "Finish" : "Next",
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                          "Slide ${_currentSlideIndex + 1} / $_totalSlides",
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+                body: Column(
+                  children: [
+                    // VIGYAAN AGENT VISUALIZER STATUS BAR
+                    if (agent.mode == VigyaanMode.classroomTutor)
+                      _buildVigyaanVisualizer(agent, themeData),
+
+                    // PRIMARY SLIDE PAGEVIEW
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1000),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                // Lock navigation if Vigyaan is in control
+                                physics: agent.isDeviceLocked ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+                                onPageChanged: (idx) {
+                                  setState(() {
+                                    _currentSlideIndex = idx;
+                                  });
+                                },
+                                itemCount: _totalSlides,
+                                itemBuilder: (context, index) {
+                                  return Column(
+                                    children: [
+                                      Expanded(
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 600),
+                                          transitionBuilder: (Widget child, Animation<double> animation) {
+                                            return SlideTransition(
+                                              position: Tween<Offset>(
+                                                begin: const Offset(0.05, 0),
+                                                end: Offset.zero,
+                                              ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                                              child: FadeTransition(opacity: animation, child: child),
+                                            );
+                                          },
+                                          child: Padding(
+                                            key: ValueKey("slide_$index"),
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: _buildSlideContent(index, themeData),
+                                          ),
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 8.0),
+                                        child: Text(
+                                          "Created by Santosh TechWorks",
+                                          style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          // REAL-TIME CAPTION OVERLAY
+                          if (agent.mode == VigyaanMode.classroomTutor && 
+                              agent.showCaptions && 
+                              agent.currentCaption.isNotEmpty)
+                            Positioned(
+                              bottom: 30,
+                              left: 20,
+                              right: 20,
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 500),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.2),
+                                          blurRadius: 20,
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Text(
+                                        agent.currentCaption,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    // NAVIGATION AND DOTS BAR
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        border: const Border(top: BorderSide(color: Colors.white10)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Previous button
+                          ElevatedButton(
+                            onPressed: (_currentSlideIndex > 0 && !agent.isDeviceLocked) ? () => _navigateToSlide(_currentSlideIndex - 1) : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.white.withValues(alpha: 0.02),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text("Previous", style: TextStyle(fontSize: 12)),
+                          ),
+
+                          // Horizontal navigation indicator dots
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(_totalSlides, (i) {
+                                  final isCurrent = i == _currentSlideIndex;
+                                  final quizStartIndex = 2 + widget.topic.explanations.length;
+                                  final quizEndIndex = 1 + widget.topic.explanations.length + widget.topic.quizzes.length;
+                                  final isQuiz = i >= quizStartIndex && i <= quizEndIndex;
+                                  
+                                  return InkWell(
+                                    onTap: !agent.isDeviceLocked ? () => _navigateToSlide(i) : null,
+                                    child: Container(
+                                      width: isCurrent ? 12 : 6,
+                                      height: 6,
+                                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                                      decoration: BoxDecoration(
+                                        color: isCurrent
+                                            ? accentText
+                                            : (isQuiz ? Colors.redAccent.withValues(alpha: 0.4) : Colors.white30),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+
+                          // Next button
+                          ElevatedButton(
+                            onPressed: (_currentSlideIndex < _totalSlides - 1 && !agent.isDeviceLocked) ? () => _navigateToSlide(_currentSlideIndex + 1) : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: themeData.colorScheme.primary,
+                              foregroundColor: themeData.colorScheme.onPrimary,
+                              disabledBackgroundColor: Colors.white.withValues(alpha: 0.02),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: Text(
+                              _currentSlideIndex == _totalSlides - 1 ? "Finish" : "Next",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // FLOATING MIC BUTTON FOR VIGYAAN
+                floatingActionButton: agent.mode == VigyaanMode.classroomTutor 
+                  ? FloatingActionButton.extended(
+                      onPressed: () => _showVigyaanResponseDialog(context, agent),
+                      backgroundColor: agent.isListening ? Colors.redAccent : Colors.indigoAccent,
+                      icon: Icon(agent.isListening ? Icons.mic : Icons.mic_none),
+                      label: Text(agent.isListening ? "Listening..." : "Talk to Vigyaan"),
+                    )
+                  : null,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildVigyaanVisualizer(VigyaanAgent agent, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(minHeight: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.indigo.withValues(alpha: 0.1),
+        border: const Border(bottom: BorderSide(color: Colors.indigoAccent, width: 0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _PulseOrb(
+            isActive: agent.isSpeaking || agent.isListening,
+            color: agent.isListening ? Colors.redAccent : Colors.greenAccent,
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  agent.isSpeaking ? "VIGYAAN IS SPEAKING..." : (agent.isListening ? "VIGYAAN IS LISTENING..." : "VIGYAAN TUTOR ACTIVE"),
+                  style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
                 ),
               ],
             ),
           ),
-        );
-      },
+          if (agent.isListening)
+            const Padding(
+              padding: EdgeInsets.only(left: 8.0),
+              child: Text("💬", style: TextStyle(fontSize: 16)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showVigyaanResponseDialog(BuildContext context, VigyaanAgent agent) {
+    final TextEditingController inputController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111827),
+        title: const Text("Respond to Vigyaan", style: TextStyle(color: Colors.white, fontSize: 16)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Speak or type your response (e.g., 'Yes', 'Samajh aa gaya', 'Repeat please')", 
+                style: TextStyle(color: Colors.grey, fontSize: 11)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: inputController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: "Enter response...",
+                  hintStyle: TextStyle(color: Colors.white24, fontSize: 14),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.indigoAccent)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          ElevatedButton(
+            onPressed: () {
+              if (inputController.text.isNotEmpty) {
+                agent.injectVerbalInput(inputController.text);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Send"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -527,11 +713,11 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
   Widget _buildSlideHeader(ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
+        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,16 +726,18 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
             widget.topic.title,
             style: TextStyle(
               color: theme.colorScheme.primary,
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             widget.topic.description,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: Colors.grey[300],
-              fontSize: 13,
+              color: Colors.grey[400],
+              fontSize: 11,
             ),
           ),
         ],
@@ -578,58 +766,60 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
       color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.2)),
+        side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.12),
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
               ),
               child: Text(
                 intro.subtitle.toUpperCase(),
-                style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               intro.title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               intro.content,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[200], fontSize: 16, height: 1.5),
+              style: TextStyle(color: Colors.grey[300], fontSize: 14, height: 1.4),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 16),
+                Icon(Icons.star, color: Colors.amber, size: 14),
                 SizedBox(width: 6),
-                Text("Key Concepts covered:", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text("Key Concepts covered:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 6,
+              runSpacing: 6,
               alignment: WrapAlignment.center,
-              children: intro.keyConcepts.map((concept) {
-                return Chip(
-                  label: Text(concept, style: const TextStyle(fontSize: 12)),
-                  backgroundColor: Colors.white.withOpacity(0.04),
-                  side: const BorderSide(color: Colors.white12),
-                );
-              }).toList(),
+              children: [
+                for (final concept in intro.keyConcepts)
+                  Chip(
+                    padding: EdgeInsets.zero,
+                    label: Text(concept, style: const TextStyle(fontSize: 10)),
+                    backgroundColor: Colors.white.withValues(alpha: 0.04),
+                    side: const BorderSide(color: Colors.white12),
+                  ),
+              ],
             ),
           ],
         ),
@@ -749,9 +939,9 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
+                        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         children: [
@@ -848,7 +1038,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                       width: 100,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.indigoAccent : Colors.white.withOpacity(0.05),
+                        color: isSelected ? Colors.indigoAccent : Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: isSelected ? Colors.white : Colors.white10),
                       ),
@@ -879,26 +1069,26 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
         side: const BorderSide(color: Colors.white10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               exp.subtitle.toUpperCase(),
-              style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+              style: TextStyle(color: theme.colorScheme.primary, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              exp.title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
-              exp.title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              exp.content,
+              style: TextStyle(color: Colors.grey[300], fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 12),
-            Text(
-              exp.content,
-              style: TextStyle(color: Colors.grey[300], fontSize: 12, height: 1.5),
-            ),
-            const SizedBox(height: 16),
-            _buildImageContainer(exp, theme),
+            _buildImageContainer(exp, theme, height: 200),
           ],
         ),
       ),
@@ -932,9 +1122,9 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
       width: double.infinity,
       constraints: BoxConstraints(minHeight: 120, maxHeight: height ?? 240),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05), style: BorderStyle.solid),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05), style: BorderStyle.solid),
       ),
       child: exp.imageUrl != null && exp.imageUrl!.isNotEmpty
           ? ClipRRect(
@@ -959,11 +1149,11 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.image_outlined, color: theme.colorScheme.primary.withOpacity(0.3), size: 40),
+        Icon(Icons.image_outlined, color: theme.colorScheme.primary.withValues(alpha: 0.3), size: 40),
         const SizedBox(height: 8),
         Text(
           "Educational Diagram / Image Placeholder",
-          style: TextStyle(color: Colors.grey.withOpacity(0.5), fontSize: 10, fontStyle: FontStyle.italic),
+          style: TextStyle(color: Colors.grey.withValues(alpha: 0.5), fontSize: 10, fontStyle: FontStyle.italic),
         ),
       ],
     );
@@ -989,26 +1179,27 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.indigoAccent),
               ),
               const SizedBox(height: 12),
-              ...items.map<Widget>((item) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.02),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ...[
+                for (final item in items)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.02),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item['title'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 4),
+                        Text(item['desc'] ?? item['description'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 12, height: 1.3)),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item['title'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(height: 4),
-                      Text(item['desc'] ?? item['description'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 12, height: 1.3)),
-                    ],
-                  ),
-                );
-              })
+              ],
             ],
           ),
         ),
@@ -1117,7 +1308,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                     width: 14,
                     height: 14,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.8),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   );
@@ -1303,7 +1494,7 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
                   icon: const Icon(Icons.fullscreen_exit),
                   label: const Text("Exit Full Screen"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
@@ -1338,169 +1529,176 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
 
   // SLIDE 6-9: MCQ QUIZZES PANEL
   Widget _buildQuizSlide(int quizIndex, ThemeData theme) {
-    if (quizIndex >= widget.topic.quizzes.length) {
-      return const Center(child: Text("Quiz index out of range"));
-    }
-    final quiz = widget.topic.quizzes[quizIndex];
-    final selectedIdx = _selectedAnswers[quizIndex];
-    final showExpl = _showExplanations[quizIndex] ?? false;
+    return Consumer<VigyaanAgent>(
+      builder: (context, agent, child) {
+        if (quizIndex >= widget.topic.quizzes.length) {
+          return const Center(child: Text("Quiz index out of range"));
+        }
+        final quiz = widget.topic.quizzes[quizIndex];
+        
+        // SYNC: Use Vigyaan's heard answer if in tutor mode, otherwise use local tap state
+        final selectedIdx = agent.mode == VigyaanMode.classroomTutor 
+            ? agent.tutorSelectedAnswers[quizIndex] 
+            : _selectedAnswers[quizIndex];
+        
+        final showExpl = (agent.mode == VigyaanMode.classroomTutor && selectedIdx != null) || (_showExplanations[quizIndex] ?? false);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Card(
-          color: theme.colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.indigo.withOpacity(0.2)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      quiz.type.toUpperCase(),
-                      style: const TextStyle(color: Colors.purpleAccent, fontSize: 9, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const Text("Quiz: Free Navigation", style: TextStyle(color: Colors.grey, fontSize: 10)),
-                ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Card(
+              color: theme.colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.indigo.withValues(alpha: 0.2)),
               ),
-              const SizedBox(height: 14),
-              // QUESTION
-              Text(
-                quiz.question,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
-              ),
-              const SizedBox(height: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            quiz.type.toUpperCase(),
+                            style: const TextStyle(color: Colors.purpleAccent, fontSize: 9, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Text(
+                          agent.mode == VigyaanMode.classroomTutor ? "VIGYAAN Tutor Active" : "Self-Study Mode",
+                          style: const TextStyle(color: Colors.grey, fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      quiz.question,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
+                    ),
+                    const SizedBox(height: 16),
+                    ...List.generate(quiz.options.length, (optIdx) {
+                      final isSelected = selectedIdx == optIdx;
+                      final isCorrect = optIdx == quiz.correctIndex;
+                      Color optBgColor = Colors.white.withValues(alpha: 0.02);
+                      Color optBorderColor = Colors.white10;
 
-              // OPTIONS LISTING
-              ...List.generate(quiz.options.length, (optIdx) {
-                final isSelected = selectedIdx == optIdx;
-                final isCorrect = optIdx == quiz.correctIndex;
-                Color optBgColor = Colors.white.withOpacity(0.02);
-                Color optBorderColor = Colors.white10;
+                      if (selectedIdx != null) {
+                        if (isSelected) {
+                          optBgColor = isCorrect ? Colors.green.withValues(alpha: 0.12) : Colors.red.withValues(alpha: 0.12);
+                          optBorderColor = isCorrect ? Colors.green : Colors.red;
+                        } else if (isCorrect && showExpl) {
+                          optBgColor = Colors.green.withValues(alpha: 0.04);
+                          optBorderColor = Colors.green.withValues(alpha: 0.5);
+                        }
+                      }
 
-                if (selectedIdx != null) {
-                  if (isSelected) {
-                    optBgColor = isCorrect ? Colors.green.withOpacity(0.12) : Colors.red.withOpacity(0.12);
-                    optBorderColor = isCorrect ? Colors.green : Colors.red;
-                  } else if (isCorrect && showExpl) {
-                    optBgColor = Colors.green.withOpacity(0.04);
-                    optBorderColor = Colors.green.withOpacity(0.5);
-                  }
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: InkWell(
-                    onTap: selectedIdx == null
-                        ? () {
-                            setState(() {
-                              _selectedAnswers[quizIndex] = optIdx;
-                              _showExplanations[quizIndex] = true;
-                            });
-                          }
-                        : null,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: optBgColor,
-                        border: Border.all(color: optBorderColor),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: InkWell(
+                          onTap: (selectedIdx == null && agent.mode != VigyaanMode.classroomTutor)
+                              ? () {
+                                  setState(() {
+                                    _selectedAnswers[quizIndex] = optIdx;
+                                    _showExplanations[quizIndex] = true;
+                                  });
+                                }
+                              : null,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isSelected ? optBorderColor : Colors.white12,
+                              color: optBgColor,
+                              border: Border.all(color: optBorderColor),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Center(
-                              child: Text(
-                                String.fromCharCode(65 + optIdx),
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              quiz.options[optIdx],
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.grey[200],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-
-              // EXPLANATION PANEL
-              if (showExpl) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.02),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            selectedIdx == quiz.correctIndex ? Icons.check_circle : Icons.error_outline,
-                            color: selectedIdx == quiz.correctIndex ? Colors.green : Colors.redAccent,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            selectedIdx == quiz.correctIndex ? "Correct Answer!" : "Incorrect Answer",
-                            style: TextStyle(
-                              color: selectedIdx == quiz.correctIndex ? Colors.green : Colors.redAccent,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isSelected ? optBorderColor : Colors.white12,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      String.fromCharCode(65 + optIdx),
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    quiz.options[optIdx],
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.grey[200],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        quiz.explanation,
-                        style: TextStyle(color: Colors.grey[400], fontSize: 11, height: 1.4),
-                      ),
-                    ],
-                  ),
-                )
-              ]
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
-}
+                        ),
+                      );
+                    }),
+                    if (showExpl) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.02),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  selectedIdx == quiz.correctIndex ? Icons.check_circle : Icons.error_outline,
+                                  color: selectedIdx == quiz.correctIndex ? Colors.green : Colors.redAccent,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  selectedIdx == quiz.correctIndex ? "Correct Answer!" : "Incorrect Answer",
+                                  style: TextStyle(
+                                    color: selectedIdx == quiz.correctIndex ? Colors.green : Colors.redAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              quiz.explanation,
+                              style: TextStyle(color: Colors.grey[400], fontSize: 11, height: 1.4),
+                            ),
+                          ],
+                        ),
+                      )
+                    ]
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   // SLIDE 10: RECAP SUMMARY & COURSE COMPLETION STATE SCREEN
   Widget _buildSummarySlide(ThemeData theme) {
@@ -1511,78 +1709,77 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
           color: theme.colorScheme.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.history_edu, color: Colors.amber, size: 18),
+                    const Icon(Icons.history_edu, color: Colors.amber, size: 16),
                     const SizedBox(width: 8),
                     Text(
                       summary.title.toUpperCase(),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.amber),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.amber),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                ...summary.keyTakeaways.map<Widget>((takeaway) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
+                const SizedBox(height: 10),
+                for (final takeaway in summary.keyTakeaways)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("• ", style: TextStyle(color: Colors.amber, fontSize: 16)),
+                        const Text("• ", style: TextStyle(color: Colors.amber, fontSize: 14)),
                         Expanded(
                           child: Text(
                             takeaway,
-                            style: TextStyle(color: Colors.grey[200], fontSize: 16, height: 1.4),
+                            style: TextStyle(color: Colors.grey[200], fontSize: 14, height: 1.4),
                           ),
                         ),
                       ],
                     ),
-                  );
-                }).toList(),
+                  ),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         // CONGRATS CERTIFICATE
         Card(
           color: const Color(0xFF1E1B4B),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.indigoAccent)),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                const Icon(Icons.emoji_events, color: Colors.amberAccent, size: 36),
-                const SizedBox(height: 8),
+                const Icon(Icons.emoji_events, color: Colors.amberAccent, size: 30),
+                const SizedBox(height: 6),
                 const Text(
                   "CONGRATULATIONS!",
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1),
+                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1),
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  "You have successfully navigated this scholastic presentation deck. Complete the exercises to claim your homework credits!",
+                  "You have successfully navigated this scholastic presentation deck.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 11, height: 1.4),
+                  style: TextStyle(color: Colors.grey, fontSize: 10, height: 1.3),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("CLASSROOM ASSIGNMENT:", style: TextStyle(color: Color(0xFFA3E635), fontSize: 9, fontWeight: FontWeight.bold)),
+                      const Text("CLASSROOM ASSIGNMENT:", style: TextStyle(color: Color(0xFFA3E635), fontSize: 8, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(summary.classroomActivity, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.3)),
-                      const SizedBox(height: 10),
-                      const Text("DID YOU KNOW?", style: TextStyle(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                      Text(summary.classroomActivity, style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.3)),
+                      const SizedBox(height: 8),
+                      const Text("DID YOU KNOW?", style: TextStyle(color: Colors.indigoAccent, fontSize: 10, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(summary.quickFact, style: TextStyle(color: Colors.grey[200], fontSize: 14, height: 1.3)),
+                      Text(summary.quickFact, style: TextStyle(color: Colors.grey[200], fontSize: 12, height: 1.3)),
                     ],
                   ),
                 )
@@ -1595,7 +1792,56 @@ class _SlidePlayerScreenState extends State<SlidePlayerScreen> {
   }
 }
 
-// DRAW INCLINED TRIANGLES FOR RAMPS OR COORDINATE ROTATIONS
+class _PulseOrb extends StatefulWidget {
+  final bool isActive;
+  final Color color;
+  const _PulseOrb({required this.isActive, required this.color});
+
+  @override
+  State<_PulseOrb> createState() => _PulseOrbState();
+}
+
+class _PulseOrbState extends State<_PulseOrb> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: widget.color,
+            boxShadow: [
+              if (widget.isActive)
+                BoxShadow(
+                  color: widget.color.withValues(alpha: 0.5),
+                  blurRadius: 4 + (_controller.value * 8),
+                  spreadRadius: _controller.value * 4,
+                )
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class InclinePainter extends CustomPainter {
   final double angleDegrees;
   final Color accentColor;
@@ -1610,7 +1856,7 @@ class InclinePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final shapePaint = Paint()
-      ..color = accentColor.withOpacity(0.12)
+      ..color = accentColor.withValues(alpha: 0.12)
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
